@@ -1,0 +1,14 @@
+reflex
+
+psycopg2-binary
+
+python-dotenv
+
+python-pydantic
+
+
+# pyjwt 
+# passlib 
+# bcrypt
+
+reflex-local-auth

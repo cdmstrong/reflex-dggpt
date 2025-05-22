@@ -17,10 +17,32 @@ def login_page():
             rx.box(
                 rx.vstack(
                     rx.heading("登录", size="4", margin_bottom="24px"),
-                    rx.input(placeholder="用户名", on_change=LoginState.set_username),
+                    rx.cond(
+                        ~LoginState.in_login,
+                        rx.input(placeholder="用户名", on_change=LoginState.set_username, value=LoginState.user.username),
+                    ),
+                    
+                    rx.input(placeholder="邮箱", on_change=LoginState.set_email),
                     rx.input(placeholder="密码", type_="password", on_change=LoginState.set_password),
-                    rx.button("登录", on_click=LoginState.login),
-                    rx.text(LoginState.error, color="red"),
+
+                    rx.cond(
+                        LoginState.in_login,
+                        rx.hstack(
+                            rx.link("注册", on_click=LoginState.toggle_register),
+                            rx.button("登录", on_click=LoginState.login),
+                        ),
+                    ),
+                    
+                    rx.cond(
+                        ~LoginState.in_login,
+                        rx.hstack(
+                            rx.button("注册", on_click=LoginState.register),
+                            rx.link("登录", on_click=LoginState.toggle_register),
+                            text_align = "center",
+                            align_items="center",
+                        )
+                    ),
+                    rx.text(LoginState.error_message, color="red"),
                     spacing="4",
                     align="center",
                 ),

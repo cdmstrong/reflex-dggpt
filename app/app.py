@@ -1,6 +1,9 @@
 import reflex as rx
-from pages import login, home
+from routes import index
+# db
+from Model.User import User
 
 app = rx.App()
-app.add_page(login.page)
-app.add_page(home.page)
+
+app.add_page(index.home_route)
+app.add_page(index.login_route)
