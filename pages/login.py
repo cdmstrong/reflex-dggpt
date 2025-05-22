@@ -1,19 +1,6 @@
 import reflex as rx
+from services.login_service import LoginState
 
-class LoginState(rx.State):
-    username: str = ""
-    password: str = ""
-    error: str = ""
-
-    @rx.event
-    def login(self):
-        # 简单校验，实际可接数据库
-        if self.username == "admin" and self.password == "123456":
-            print("登录成功")
-            return rx.redirect("/home")
-
-        else:
-            self.error = "用户名或密码错误11"
 
 def login_page():
     return rx.box(
@@ -22,7 +9,7 @@ def login_page():
             "东哥科技",
             size="9",
             color="#1A237E",
-            margin_bottom="32px",
+            margin_bottom="68px",
             align="center",
         ),
         # 居中登录面板
@@ -43,11 +30,35 @@ def login_page():
                 bg="white",
                 min_width="320px",
             ),
-            height="calc(100vh - 120px)",  # 预留顶部标题空间
+            # height="calc(100vh - 158px)",  # 预留顶部标题空间
         ),
+        concat_page(),
         width="100vw",
         height="100vh",
+        display="flex",
+        flex_direction="column",
+        justify_content="center",
+        align_items="center",
         bg="#f5f6fa",
     )
+
+def concat_page():
+    return rx.box(
+            rx.text("联系客服", color="#000000", font_size="16px", font_weight="bold", margin_bottom="10px"),
+            rx.hover_card.root(
+                rx.hover_card.trigger(
+                    rx.avatar(src=rx.asset("concat.png"), size="5")
+                ),
+                rx.hover_card.content(
+                    rx.image(src=rx.asset("qr_code.png"), width="100px")
+                ),
+            
+            ),
+            style = {
+                    "position":"fixed",
+                    "right":"160px",
+                    "zIndex": "1000"
+            }
+        )
 
 page = rx.page(route="/login")(login_page)
