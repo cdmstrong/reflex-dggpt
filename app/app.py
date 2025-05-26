@@ -16,7 +16,12 @@ async def get_items(request: Request):
     # 获取request的query参数
     query = request.query_params
     print(query)
-    return dict(items=["Item1", "Item2", "Item3"])
+    # 获取code
+    code = query.get("code")
+    # 获取access_token
+    access_token = get_access_token(code)
+
+    # return dict(items=["Item1", "Item2", "Item3"])
 
 app = rx.App(api_transformer=fastapi_app)
 

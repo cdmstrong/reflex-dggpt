@@ -15,6 +15,7 @@ class WereadState(rx.State):
     notion_link = "https://api.notion.com/v1/oauth/authorize?client_id=1fad872b-594c-8143-9186-003750ff3168&response_type=code&owner=user&redirect_uri=https%3A%2F%2Fcdmstrong.github.io%2F"
     _n_tasks: int = 0 
     weread: Weread_async
+    access_token: str = ""
     def __init__(self):
         pass
 
@@ -29,10 +30,15 @@ class WereadState(rx.State):
             vip = result.first()
             if not vip:
                 return 
-            
         self.weread = Weread_async(vip.weread_cookie, vip.cc_id, vip.cc_password, vip.notion_token, vip.notion_page)
         return self.weread
     
+    @rx.event
+    async def run_bind_notion(self):
+        # 绑定notion
+        # get_access_token()
+        get_page_id()
+
     @rx.event(background=True)
     async def run_weread(self):
         # 同步书籍，同步笔记，同步时间
@@ -42,6 +48,7 @@ class WereadState(rx.State):
             self._n_tasks += 1
             self.weread.start_sync()
 
+
 def access_redict():
     
     # https://yourapp.com/oauth/callback?code=AUTHORIZATION_CODE
@@ -49,26 +56,27 @@ def access_redict():
     pass
 
 
-def get_access_token():
-#     curl -X POST https://api.notion.com/v1/oauth/token \
-#   -H "Content-Type: application/json" \
-#   -d '{
-#     "grant_type": "authorization_code",
-#     "code": "AUTHORIZATION_CODE",
-#     "redirect_uri": "YOUR_REDIRECT_URI",
-#     "client_id": "YOUR_CLIENT_ID",
-#     "client_secret": "YOUR_CLIENT_SECRET"
-#   }'
-#     q_json = {
-#     "grant_type": "authorization_code",
-#     "code": "AUTHORIZATION_CODE",
-#     "redirect_uri": "http://43.153.7.130:8000/api/get_token",
-#     
-#   }
-#     httpx.post("https://api.notion.com/v1/oauth/token", json=q_json)
+    def get_access_token(self, code):
+    #     curl -X POST https://api.notion.com/v1/oauth/token \
+    #   -H "Content-Type: application/json" \
+    #   -d '{
+    #     "grant_type": "authorization_code",
+    #     "code": "AUTHORIZATION_CODE",
+    #     "redirect_uri": "YOUR_REDIRECT_URI",
+    #     "client_id": "YOUR_CLIENT_ID",
+    #     "client_secret": "YOUR_CLIENT_SECRET"
+    #   }'
+    #     q_json = {
+    #     "grant_type": "authorization_code",
+    #     "code": "AUTHORIZATION_CODE",
+    #     "redirect_uri": "http://43.153.7.130:8000/api/get_token",
+    #     
+    #   }
+    #     httpx.post("https://api.notion.com/v1/oauth/token", json=q_json)
 
-#     return access_token, bot_id
-    pass
+    #     return access_token, bot_id
+        self.access_token = httpx.post("https://api.notion.com/v1/oauth/token", json=q_json)
+        pass
 
 
 def get_page_id():
