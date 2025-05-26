@@ -1,0 +1,23 @@
+reflex
+
+psycopg2-binary
+
+python-dotenv
+
+pydantic
+
+
+# pyjwt 
+# passlib 
+# bcrypt
+
+reflex-local-auth
+
+pillow
+qrcode
+python-alipay-sdk
+
+# weread 
+notion-client
+weread2notionpro
+github-hotmap
