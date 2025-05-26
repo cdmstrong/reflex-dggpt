@@ -21,3 +21,6 @@ python-alipay-sdk
 notion-client
 weread2notionpro
 github-hotmap
+requests
+retrying
+pendulum
