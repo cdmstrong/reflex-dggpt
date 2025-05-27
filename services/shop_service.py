@@ -84,6 +84,11 @@ class ShopService(rx.State):
                     self.is_order_exist = False
                     self.show_qr_dialog = False
                     self.pay_order.is_pay = True
+                    login_state = await self.get_state(LoginState)
+                    current_user_id = login_state.user.user_id
+                    current_pay_type = self.pay_order.pay_type.value
+                    current_product_name = self.pay_order.product_name
+                    print(f"current_user_id: {current_user_id}, current_pay_type: {current_pay_type}, current_product_name: {current_product_name}")
                     await self.save_pay_order()
                 return res
             await asyncio.sleep(2)
@@ -91,17 +96,28 @@ class ShopService(rx.State):
                 self.order_left_time -= 3
         return None
     async def save_pay_order(self):
-        with rx.session() as session:
-            vip_order = Vip(
-                user_id = LoginState.user.user_id,
-                start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                end_time = (datetime.now() + relativedelta(years=10)).strftime("%Y-%m-%d %H:%M:%S"),
-                type = self.pay_order.pay_type,
-                product_name = self.pay_order.product_name
-            )
-            session.add(vip_order)
-            session.commit()
-        
+        try:
+            # 正确获取 LoginState
+            login_state = await self.get_state(LoginState)
+            user_id = login_state.user.user_id
+            
+            # 获取订单相关信息
+            pay_type = self.pay_order.pay_type.value  # 使用 .value 获取枚举值
+            product_name = self.pay_order.product_name
+
+            with rx.session() as session:
+                vip_order = Vip(
+                    user_id = user_id,
+                    start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    end_time = (datetime.now() + relativedelta(years=10)).strftime("%Y-%m-%d %H:%M:%S"),
+                    type = pay_type,
+                    product_name = product_name
+                )
+                session.add(vip_order)
+                session.commit()
+                print(f"订单保存成功: user_id={user_id}, type={pay_type}, product={product_name}")
+        except Exception as e:
+            print(f"保存订单时发生错误: {str(e)}")
     @rx.event(background=True)
     async def buy_product(self, product: ProductBase):
         
@@ -112,7 +128,7 @@ class ShopService(rx.State):
             if self.is_order_exist:
                 print("订单已存在")
                 return 
-            res = self.alipay_server.PreCreate(product.name, product.price * (1 - product.discount))
+            res = self.alipay_server.PreCreate(product.name, product.price * product.discount)
             if res:
                 async with self:
                     self.pay_order = OrderInfo(
@@ -138,6 +154,10 @@ class ShopService(rx.State):
             else:
                 retry_count += 1
 
-
+    @rx.event
+    async def get_user_id(self):
+        login_state = await self.get_state(LoginState)
+        print(f"login_state: {login_state}")
+        return login_state.user_info.user_id
 
 

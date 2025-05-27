@@ -3,14 +3,37 @@ import reflex as rx
 from data.user_data import UserLogin
 from Model.User import User
 from datetime import timedelta
+import datetime
 import reflex_local_auth
 from reflex_local_auth import LocalUser
 from sqlmodel import select
+
+DEFAULT_AUTH_REFRESH_DELTA = datetime.timedelta(minutes=10)
+
 class LoginState(reflex_local_auth.LocalAuthState):
-    user: UserLogin = UserLogin(username="", password="", user_id="", email="", is_admin=False, start_time=None, end_time=None, register_time=None)
+    user: UserLogin = UserLogin(username="", password="", user_id=None, email="", is_admin=False, start_time=None, end_time=None, register_time=None)
     error_message: str = ""
     in_login: bool = True
 
+    @rx.var(cache=True, interval=DEFAULT_AUTH_REFRESH_DELTA)
+    def user_info(self) -> UserLogin:
+        """The currently authenticated user, or a dummy user if not authenticated.
+
+        Returns:
+            A LocalUser instance with id=-1 if not authenticated, or the LocalUser instance
+            corresponding to the currently authenticated user.
+        """
+        with rx.session() as session:
+            statement = select(User).where(
+                (User.user_id == self.authenticated_user.id)
+            )
+            result = session.exec(statement)
+            user = result.first()
+            if user:
+                return UserLogin.from_orm(user)
+            else:
+                return UserLogin(username="", password="", user_id=None, email="", is_admin=False, start_time=None, end_time=None, register_time=None)
+            
     @rx.event
     async def login(self):
         # await self.get_var_value(AuthState.username)
@@ -21,7 +44,7 @@ class LoginState(reflex_local_auth.LocalAuthState):
             result = session.exec(statement)
             user = result.first()
         if user :
-            print(user.id)
+            # print(user.id)
             self._login(user.id, expiration_delta=timedelta(days=2))
             self.error_message = ""
             return rx.redirect("/home")
@@ -55,8 +78,8 @@ class LoginState(reflex_local_auth.LocalAuthState):
 
     @rx.event
     def logout(self):
-        self.user.username = ""
-        self.user.password = ""
+        # self.user.username = ""
+        # self.user.password = ""
         self.error_message = ""
         self.do_logout()
         return rx.redirect("/login")

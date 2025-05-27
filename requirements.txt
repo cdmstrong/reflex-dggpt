@@ -20,7 +20,9 @@ python-alipay-sdk
 # weread 
 notion-client
 weread2notionpro
-github-hotmap
+# github-hotmap
 requests
 retrying
 pendulum
+
+python-dateutil
