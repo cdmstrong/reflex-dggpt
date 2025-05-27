@@ -123,8 +123,8 @@ class AlipayServer:
         result=self.alipay.api_alipay_trade_query(out_trade_no=out_trade_no)
         if result.get("trade_status","")=="TRADE_SUCCESS":
             print('订单已支付')
-            print('订单查询返回值：',result)
             trade_status = True
+        print('订单查询返回值：',result.get("trade_status",""))
         if trade_status:
             return True
         else:

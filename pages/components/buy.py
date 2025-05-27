@@ -63,10 +63,10 @@ def qr_dialog():
                 rx.text(ShopService.pay_order.product_name, size="2", color="gray"),
                 rx.text(f"￥{ShopService.pay_order.product_price}元", size="2", color="red"),
                 rx.image(src=rx.get_upload_url(ShopService.pay_order.pay_qr_code), width="200px"),
-                
+                rx.text(f"剩余时间{ShopService.order_left_time}秒", size="2", color="gray"),
                 rx.dialog.close(
                         rx.button("关闭", size="3", on_click=ShopService.close_buy_dialog),
                 ),
             ),
-            open=ShopService.show_buy_dialog,
+            open=ShopService.show_qr_dialog,
     )

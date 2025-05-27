@@ -16,3 +16,4 @@ class Vip(rx.Model, table=True):
     weread_cookie: str = Field(default=None)
     notion_page: str = Field(default=None)
     type: int = Field(default=None)
+    product_name: str = Field(default=None)

@@ -10,4 +10,5 @@ class Product(rx.Model, table=True):
     description: str
     time: int = Field(default=0)
     discount: float = Field(default=0)
+    type: int = Field(default=1)
    

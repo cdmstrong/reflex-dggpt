@@ -9,8 +9,9 @@ from enum import Enum
 class Vip_type(Enum):
     WEREAD = 1
 
+
 class VipBase(BaseModel):
-    type: Vip_type = int(Vip_type.WEREAD)
+    type: int = Vip_type.WEREAD.value
     startTime: datetime = None 
     endTime: datetime = None
     vip_id: int = None
@@ -19,6 +20,7 @@ class VipBase(BaseModel):
     notion_page: Optional[str] = None
     cc_id: Optional[str] = None
     cc_password: Optional[str] = None
+    product_name: Optional[str] = None
 
 
 

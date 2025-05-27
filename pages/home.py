@@ -2,6 +2,7 @@ import reflex as rx
 import reflex_local_auth
 
 from pages.components.buy import buy_product_com
+from pages.components.vip_product_page import vip_product_page
 from services.login_service import LoginState
 
 
@@ -50,7 +51,7 @@ def content_area():
                 padding="2em",
             ),
             rx.tabs.content(
-                rx.text("这里是 Tab 2 的内容"),
+                vip_product_page(),
                 value="relevance",
                 padding="3em",
 

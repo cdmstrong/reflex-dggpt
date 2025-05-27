@@ -1,8 +1,12 @@
 
+import asyncio
+import time
 import reflex as rx
-from datetime import datetime
+from datetime import datetime, timedelta
+from Model.Vip import Vip
 from data.shop_data import OrderInfo, ProductBase
 from lib.alipay_lib.alipay_server import AlipayServer
+from services.login_service import LoginState
 
 class ShopService(rx.State):
     product_list: list[ProductBase] = [
@@ -30,7 +34,11 @@ class ShopService(rx.State):
     product: ProductBase = None
     product_count: int = 1
     show_buy_dialog: bool = False
-
+    # 订单剩余时间
+    order_left_time: int = 600
+    # 是否存在未支付订单
+    is_order_exist: bool = False
+    @property
     def alipay_server(self):
         return AlipayServer()
     # def __init__(self, *args, **kwargs):
@@ -44,42 +52,86 @@ class ShopService(rx.State):
     @rx.event
     def close_qr_dialog(self):
         self.show_qr_dialog = False
-        self.alipay_server.cancel_order(self.pay_order.order_id)
+        res = self.alipay_server.cancel_order(self.pay_order.order_id)
+        if res:
+            self.is_order_exist = False
+
     @rx.event
     def set_product(self, product: ProductBase):
         self.product = product
-        # self.show_qr_dialog = True
-        self.show_buy_dialog = True
+        self.show_qr_dialog = True
+        # self.show_buy_dialog = True
         self.product_count = 1
     @rx.event
     def close_buy_dialog(self):
-        self.show_buy_dialog = False
+        self.show_qr_dialog = False
     @rx.event
     def set_product_count(self, product_count: int):
         self.product_count = product_count
 
-    @rx.event
-    def buy_product(self, product: ProductBase ):
+    # 订单查询方法
+    async def query_order(self, order_id: str):
+        # 10分钟内每3s查询一次
+        print("开始查询")
+        while self.order_left_time > 0:
+            if not self.is_order_exist:
+                return None
+            res = self.alipay_server.query_order(order_id)
+            print(f"res order {res}")
+            if res:
+                async with self:
+                    self.order_left_time = 600
+                    self.is_order_exist = False
+                    self.show_qr_dialog = False
+                    self.pay_order.is_pay = True
+                return res
+            await asyncio.sleep(2)
+            async with self:
+                self.order_left_time -= 3
+        return None
+    async def save_pay_order(self):
+        with rx.session() as session:
+            vip_order = Vip(
+                user_id = LoginState.user.user_id,
+                start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + timedelta(days=30),
+                type = self.pay_order.pay_type,
+                product_name = self.pay_order.product_name
+            )
+            session.add(vip_order)
+            session.commit()
+    @rx.event(background=True)
+    async def buy_product(self, product: ProductBase):
         
         # 生成购买链接
         # 生成购买二维码
         retry_count = 0
         while retry_count < 3:
+            if self.is_order_exist:
+                print("订单已存在")
+                return 
             res = self.alipay_server.PreCreate(product.name, product.price * (1 - product.discount))
             if res:
-                self.pay_order = OrderInfo(
-                    order_id=res["out_trade_no"],
-                    product_id=product.product_id,
-                    product_name=product.name,
-                    product_price=product.price,
-                    product_discount=product.discount,
-                    product_time= datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    is_pay=False,
-                    pay_time=None,
-                    pay_qr_code=res["qr_code"],
-                    pay_link=res["pay_url"],
-                )
-                self.show_qr_dialog = True
+                async with self:
+                    self.pay_order = OrderInfo(
+                        order_id=res["out_trade_no"],
+                        product_id=product.product_id,
+                        product_name=product.name,
+                        product_price=product.price,
+                        product_discount=product.discount,
+                        product_time= datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        is_pay=False,
+                        pay_time=None,
+                        pay_qr_code=res["qr_code"],
+                        pay_link=res["pay_url"],
+                        pay_type = product.type
+                    )
+                    
+                    self.is_order_exist = True
+                    self.show_qr_dialog = True
+                await self.query_order(self.pay_order.order_id)
+
+                # self.show_buy_dialog = True
                 break
             else:
                 retry_count += 1
