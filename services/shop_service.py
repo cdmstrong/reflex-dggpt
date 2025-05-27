@@ -1,4 +1,3 @@
-
 import asyncio
 import time
 import reflex as rx
@@ -7,6 +6,7 @@ from Model.Vip import Vip
 from data.shop_data import OrderInfo, ProductBase
 from lib.alipay_lib.alipay_server import AlipayServer
 from services.login_service import LoginState
+from dateutil.relativedelta import relativedelta
 
 class ShopService(rx.State):
     product_list: list[ProductBase] = [
@@ -84,6 +84,7 @@ class ShopService(rx.State):
                     self.is_order_exist = False
                     self.show_qr_dialog = False
                     self.pay_order.is_pay = True
+                    await self.save_pay_order()
                 return res
             await asyncio.sleep(2)
             async with self:
@@ -94,12 +95,13 @@ class ShopService(rx.State):
             vip_order = Vip(
                 user_id = LoginState.user.user_id,
                 start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + timedelta(days=30),
+                end_time = (datetime.now() + relativedelta(years=10)).strftime("%Y-%m-%d %H:%M:%S"),
                 type = self.pay_order.pay_type,
                 product_name = self.pay_order.product_name
             )
             session.add(vip_order)
             session.commit()
+        
     @rx.event(background=True)
     async def buy_product(self, product: ProductBase):
         
