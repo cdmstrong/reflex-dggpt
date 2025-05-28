@@ -5,6 +5,7 @@ from services.vip_service import VipService
 
 
 def vip_product_page():
+
     return rx.box(
         # 遍历列表展示
             rx.heading("产品列表", size="5", margin_bottom="1em"),  

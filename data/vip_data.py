@@ -24,4 +24,7 @@ class VipBase(BaseModel):
 
 
 
-    
+class VipSchema(VipBase):
+
+    class Config:
+        from_attributes = True

@@ -1,19 +1,25 @@
 
 import reflex as rx
 from datetime import datetime, timedelta
+from Model import Vip
 from data.shop_data import OrderInfo, ProductBase
-from data.vip_data import Vip_type, VipBase
+from data.vip_data import Vip_type, VipSchema
 from lib.alipay_lib.alipay_server import AlipayServer
-
+from sqlmodel import select
 class VipService(rx.State):
 
     # 是否显示所有产品页面
     is_show_product_page: bool = True
 
 
-    vip_list: list[VipBase] = []
-
+    vip_list: list[VipSchema] = []
+    
     def get_vip_list(self):
+        with rx.session() as session:
+           statement = select(Vip)
+           result = session.exec(statement)
+           self.vip_list = result.all()
+
         return self.vip_list
     
     

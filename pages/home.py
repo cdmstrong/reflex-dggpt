@@ -4,7 +4,16 @@ import reflex_local_auth
 from pages.components.buy import buy_product_com
 from pages.components.vip_product_page import vip_product_page
 from services.login_service import LoginState
+from services.vip_service import VipService
+class HomeState(rx.State):
+    value = "buy"
 
+    @rx.event
+    def on_tab_change(self, val):
+        self.value = val
+        if val == "relevance":
+            # 这里写 vip_product_page 需要初始化的逻辑
+            VipService.get_vip_list()
 
 def top_bar():
     return rx.box(
@@ -60,6 +69,8 @@ def content_area():
             orientation="vertical",
             height="calc(100vh - 60px)",
             padding="1em",
+            value=HomeState.value,
+            on_change=HomeState.on_tab_change,
     )
 
 @rx.page(route="/home")

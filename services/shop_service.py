@@ -2,14 +2,15 @@ import asyncio
 import time
 import reflex as rx
 from datetime import datetime, timedelta
+from Model.Product import Product
 from Model.Vip import Vip
-from data.shop_data import OrderInfo, ProductBase
+from data.shop_data import OrderInfo, ProductBase, ProductSchema
 from lib.alipay_lib.alipay_server import AlipayServer
 from services.login_service import LoginState
 from dateutil.relativedelta import relativedelta
-
+from sqlmodel import select
 class ShopService(rx.State):
-    product_list: list[ProductBase] = [
+    product_list: list[ProductSchema] = [
         {
             "name": "微信读书",
             "product_id": 1,
@@ -46,8 +47,12 @@ class ShopService(rx.State):
     #     self.alipay_server = AlipayServer()
         # self.get_product_list()
     # 获取产品列表
+    @rx.event
     def get_product_list(self):
-
+        with rx.session() as session:
+            statement = select(Product)
+            result = session.exec(statement)
+            self.product_list = result.all()
         return self.product_list
     @rx.event
     def close_qr_dialog(self):

@@ -31,6 +31,19 @@ class WereadState(rx.State):
                 return 
             self.vip_info = vip
 
+    @rx.event
+    def save_data(self, data: dict):
+        self.access_token = data.get("token", "")
+        self.notion_page = data.get("page_id", "")
+        self.weread_cookie = data.get("cookie", "")
+        # 更新到数据库
+        with rx.session() as session:
+            statement = select(Vip).where(
+                (Vip.user_id == LoginState.user.user_id) & (Vip.vip_type == Vip_type.WEREAD))
+            result = session.exec(statement)
+            vip = result.first()
+            if not vip:
+                return 
     @property
     def weread(self):
         vip = self.vip_info
