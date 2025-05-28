@@ -95,7 +95,7 @@ def top_bar():
         rx.box(rx.text("东哥科技", font_size="20px", font_weight="bold")),
         rx.box(
             rx.hstack(
-                rx.text(LoginState.user.username, font_size="16px", font_weight="bold"),
+                rx.text(LoginState.user_info.username, font_size="16px", font_weight="bold"),
                 rx.vstack(
                     rx.hover_card.root(
                         rx.hover_card.trigger(

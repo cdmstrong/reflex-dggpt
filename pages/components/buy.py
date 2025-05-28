@@ -15,7 +15,7 @@ def buy_product_com():
                         rx.image(src=f"/{product.image}", width="160px", height="160px"),
                         rx.text(product.name, bold=True, size="3"),
                         rx.hstack( 
-                            rx.text(f"￥{product.price * (1 - product.discount)}元", size="3", color="red"),
+                            rx.text(f"￥{product.price * (product.discount)}元", size="3", color="red"),
                             rx.text(f"￥{product.price}元", size="2", color="gray"),
                             spacing="1",
                             align="center",
@@ -30,7 +30,7 @@ def buy_product_com():
                                 "whiteSpace": "normal",
                             }),
                         rx.button("购买", on_click=ShopService.buy_product(product)),
-
+                        rx.button("测试", on_click=ShopService.get_user_id),
                         align="start", 
                         justify="center",
                     ),
@@ -65,7 +65,7 @@ def qr_dialog():
                 rx.image(src=rx.get_upload_url(ShopService.pay_order.pay_qr_code), width="200px"),
                 rx.text(f"剩余时间{ShopService.order_left_time}秒", size="2", color="gray"),
                 rx.dialog.close(
-                        rx.button("关闭", size="3", on_click=ShopService.close_buy_dialog),
+                        rx.button("关闭", size="3", on_click=ShopService.close_qr_dialog),
                 ),
             ),
             open=ShopService.show_qr_dialog,
