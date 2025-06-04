@@ -144,6 +144,7 @@ def sidebar() -> rx.Component:
     ordered_page_routes = [
         "/",
         "/table", 
+        "/product",
         "/about",
         "/profile",
         "/settings",

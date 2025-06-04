@@ -1,5 +1,8 @@
 import reflex as rx
 
+from ..backend.product import ProductManagerState
+from data.shop_data import ProductSchema
+
 from ..backend.table_state import Item, TableState
 from ..components.status_badge import status_badge
 
@@ -190,4 +193,46 @@ def main_table() -> rx.Component:
         ),
         _pagination_view(),
         width="100%",
+    )
+
+def _show_product_item(item: ProductSchema, index: int) -> rx.Component:
+    
+    bg_color = rx.cond(
+        index % 2 == 0,
+        rx.color("gray", 1),
+        rx.color("accent", 2),
+    )
+    hover_color = rx.cond(
+        index % 2 == 0,
+        rx.color("gray", 3),
+        rx.color("accent", 3),
+    )
+    return rx.table.row(
+        rx.table.row_header_cell(item.name),
+        rx.table.cell(f"${item.price}"),
+        rx.table.cell(item.discount),
+        rx.table.cell(item.type),
+        style={"_hover": {"bg": hover_color}, "bg": bg_color},
+        align="center",
+    )
+
+def product_table() -> rx.Component:
+    return rx.table.root(
+        rx.table.header(
+            rx.table.row(
+                _header_cell("产品名称", "user"),
+                _header_cell("产品价格", "dollar-sign"),
+                _header_cell("产品折扣", "calendar"),
+                _header_cell("产品类型", "notebook-pen"),
+            ),
+        ),
+        rx.table.body(
+            rx.foreach(
+                ProductManagerState.product_list,
+                lambda item, index: _show_product_item(item, index),
+            )
+        ),
+        variant="surface",
+        size="3",
+        width="100%",           
     )
