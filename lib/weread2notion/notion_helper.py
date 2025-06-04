@@ -51,7 +51,13 @@ class NotionHelper:
     show_color = True
     block_type = "callout"
     sync_bookmark = True
-    def __init__(self, token, page_id):
+    notion_token = None
+    notion_page = None
+    vip_id = None
+    def __init__(self, token, page_id, vip_id):
+        self.notion_token = token
+        self.vip_id = vip_id
+        self.notion_page = page_id
         self.client = Client(auth=token, log_level=logging.ERROR)
         self.__cache = {}
         self.page_id = self.extract_page_id(page_id)
@@ -95,13 +101,16 @@ class NotionHelper:
         self.setting_database_id = self.database_id_dict.get(
             self.database_name_dict.get("SETTING_DATABASE_NAME")
         )
-        self.update_book_database()
-        if self.read_database_id is None:
-            self.create_database()
-        if self.setting_database_id is None:
-            self.create_setting_database()
-        if self.setting_database_id:
-            self.insert_to_setting_database()
+        try:
+            self.update_book_database()
+            if self.read_database_id is None:
+                self.create_database()
+            if self.setting_database_id is None:
+                self.create_setting_database()
+            if self.setting_database_id:
+                self.insert_to_setting_database()
+        except Exception as e:
+            raise Exception("初始化失败 notion helper 失败")
 
     def extract_page_id(self, notion_url):
         # 正则表达式匹配 32 个字符的 Notion page_id
@@ -244,9 +253,9 @@ class NotionHelper:
         properties = {
             "标题": {"title": [{"type": "text", "text": {"content": "设置"}}]},
             "最后同步时间": {"date": {"start": pendulum.now("Asia/Shanghai").isoformat()}},
-            "NotinToken": {"rich_text": [{"type": "text", "text": {"content": os.getenv("NOTION_TOKEN")}}]},
-            "NotinPage": {"rich_text": [{"type": "text", "text": {"content": os.getenv("NOTION_PAGE")}}]},
-            "WeReadCookie": {"rich_text": [{"type": "text", "text": {"content": os.getenv("WEREAD_COOKIE")}}]},
+            "NotinToken": {"rich_text": [{"type": "text", "text": {"content": self.notion_token}}]},
+            "NotinPage": {"rich_text": [{"type": "text", "text": {"content": self.notion_page}}]},
+            # "WeReadCookie": {"rich_text": [{"type": "text", "text": {"content": self.weread_cookie}}]},
         }
         if existing_pages:
             remote_properties = existing_pages[0].get("properties")

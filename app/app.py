@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
+# 导入管理端组件
+from components.dashboard_com.dashboard.pages import *
 fastapi_app = FastAPI(title="My API")
 
 
@@ -50,5 +52,5 @@ async def get_items(request: Request):
 
 app = rx.App(api_transformer=fastapi_app)
 
-app.add_page(home.home_page)
-app.add_page(login.login_page)
+# app.add_page(home.home_page)
+# app.add_page(login.login_page)

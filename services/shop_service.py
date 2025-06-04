@@ -52,8 +52,8 @@ class ShopService(rx.State):
         with rx.session() as session:
             statement = select(Product)
             result = session.exec(statement)
-            self.product_list = result.all()
-        return self.product_list
+            product_list = result.all()
+        self.product_list = [ProductSchema.from_orm(product) for product in product_list]
     @rx.event
     def close_qr_dialog(self):
         self.show_qr_dialog = False
@@ -116,7 +116,8 @@ class ShopService(rx.State):
                     start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     end_time = (datetime.now() + relativedelta(years=10)).strftime("%Y-%m-%d %H:%M:%S"),
                     type = pay_type,
-                    product_name = product_name
+                    product_name = product_name,
+                    vip_price = self.pay_order.product_price * self.pay_order.product_discount
                 )
                 session.add(vip_order)
                 session.commit()
@@ -162,7 +163,7 @@ class ShopService(rx.State):
     @rx.event
     async def get_user_id(self):
         login_state = await self.get_state(LoginState)
-        print(f"login_state: {login_state}")
-        return login_state.user_info.user_id
+        print(f"login_state: {login_state.user}")
+        return login_state.user.user_id
 
 

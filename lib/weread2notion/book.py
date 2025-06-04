@@ -1,7 +1,9 @@
 import pendulum
+
+from utils.logs import VipLogManager
 from .notion_helper import NotionHelper
 from .weread_api import WeReadApi
-from .utils import *
+from . import utils
 from .config import book_properties_type_dict, tz
 
 
@@ -82,6 +84,7 @@ class Book():
         print(
             f"正在插入《{book.get('title')}》,一共{len(books)}本，当前是第{index+1}本。"
         )
+        VipLogManager().add_log(self.vip_id, f"正在插入《{book.get('title')}》,一共{len(books)}本，当前是第{index+1}本。")
         parent = {"database_id": self.notion_helper.book_database_id, "type": "database_id"}
         result = None
         if bookId in self.notion_books:
@@ -149,11 +152,12 @@ class Book():
             )
 
 
-    def __init__(self, weread_api, notion_help):
+    def __init__(self, weread_api, notion_help, vip_id):
         self.weread_api = weread_api
         self.notion_helper = notion_help
         self.archive_dict = {}
         self.notion_books = {}
+        self.vip_id = vip_id
 
 
     def run(self):
@@ -189,13 +193,15 @@ class Book():
             for index, bookId in enumerate(books):
                 self.insert_book_to_notion(books, index, bookId)
         except Exception as e:
-            raise "get all books error"
+            print(e)
+            VipLogManager().add_log(self.vip_id, f"获取书籍失败，请更新cookie后重试: {e}")
+            raise Exception("获取书籍失败")
 
 
 if __name__ == "__main__":
     import os
     from dotenv import load_dotenv
-    load_dotenv()
+    load_dotenv(override=True)
     weread_api = WeReadApi(os.getenv("WEREAD_COOKIE"), os.getenv("CC_ID"), os.getenv("CC_PASSWORD"))
     notion_helper = NotionHelper(os.getenv("NOTION_TOKEN"), os.getenv("NOTION_PAGE"))
     book = Book(weread_api, notion_helper)

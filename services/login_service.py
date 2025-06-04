@@ -30,7 +30,8 @@ class LoginState(reflex_local_auth.LocalAuthState):
             result = session.exec(statement)
             user = result.first()
             if user:
-                return UserLogin.from_orm(user)
+                self.user = UserLogin.from_orm(user)
+                return self.user
             else:
                 return UserLogin(username="", password="", user_id=None, email="", is_admin=False, start_time=None, end_time=None, register_time=None)
             

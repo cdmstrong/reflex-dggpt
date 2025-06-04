@@ -1,3 +1,4 @@
+from utils.logs import VipLogManager
 from .notion_helper import NotionHelper
 from .weread_api import WeReadApi
 
@@ -187,6 +188,8 @@ class Weread():
             l.extend(self.append_blocks_to_notion(id, blocks, before_block_id, sub_contents))
         for index, value in enumerate(l):
             print(f"正在插入第{index+1}条笔记，共{len(l)}条")
+            VipLogManager().add_log(self.vip_id, f"正在插入第{index+1}条笔记，共{len(l)}条")
+
             if "bookmarkId" in value:
                 self.notion_helper.insert_bookmark(id, value)
             elif "reviewId" in value:
@@ -233,9 +236,10 @@ class Weread():
             content["blockId"] = result.get("id")
             l.append(content)
         return l
-    def __init__(self, weread_api, notion_helper):
+    def __init__(self, weread_api, notion_helper, vip_id):
         self.weread_api = weread_api
         self.notion_helper = notion_helper
+        self.vip_id = vip_id
     
     def run(self):
         notion_books = self.notion_helper.get_all_book()
@@ -253,6 +257,7 @@ class Weread():
                     continue
                 pageId = notion_books.get(bookId).get("pageId")
                 print(f"正在同步《{title}》,一共{len(books)}本，当前是第{index+1}本。")
+                VipLogManager().add_log(self.vip_id, f"正在同步《{title}》,一共{len(books)}本，当前是第{index+1}本。")
                 chapter = self.weread_api.get_chapter_info(bookId)
                 bookmark_list = self.get_bookmark_list(pageId, bookId)
                 reviews = self.get_review_list(pageId,bookId)

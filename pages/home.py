@@ -4,6 +4,8 @@ import reflex_local_auth
 from pages.components.buy import buy_product_com
 from pages.components.vip_product_page import vip_product_page
 from services.login_service import LoginState
+
+from services.shop_service import ShopService
 from services.vip_service import VipService
 class HomeState(rx.State):
     value = "buy"
@@ -14,6 +16,17 @@ class HomeState(rx.State):
         if val == "relevance":
             # 这里写 vip_product_page 需要初始化的逻辑
             VipService.get_vip_list()
+        elif val == "buy":
+            ShopService.get_product_list()
+
+    @rx.event
+    async def get_data(self):
+        print("get_data")
+        vip_state = await self.get_state(VipService)
+        # print(f"vip_state: {vip_state}")
+        yield await vip_state.get_vip_list()
+        shop_state = await self.get_state(ShopService)
+        yield shop_state.get_product_list()
 
 def top_bar():
     return rx.box(
@@ -72,8 +85,7 @@ def content_area():
             value=HomeState.value,
             on_change=HomeState.on_tab_change,
     )
-
-@rx.page(route="/home")
+@rx.page(route="/home", on_load=HomeState.get_data)
 @reflex_local_auth.require_login
 def home_page():
     

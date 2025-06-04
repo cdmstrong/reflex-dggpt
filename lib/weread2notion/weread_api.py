@@ -9,7 +9,9 @@ from retrying import retry
 from urllib.parse import quote
 from dotenv import load_dotenv
 
-load_dotenv()
+from utils.logs import VipLogManager
+
+load_dotenv(override=True)
 # print(os.environ)
 WEREAD_URL = "https://weread.qq.com/"
 WEREAD_NOTEBOOKS_URL = "https://weread.qq.com/api/user/notebook"
@@ -24,12 +26,19 @@ WEREAD_HISTORY_URL = "https://i.weread.qq.com/readdata/summary?synckey=0"
 
 
 class WeReadApi:
-    def __init__(self, cookie, cc_id, cc_password):
-        
-        self.session = requests.Session()
-        # self.session.cookies = self.parse_cookie_string(self.cookie)
-        self.cookie = self.get_cookie(cookie, cc_id, cc_password)
-        self.session.cookies.update(self.get_cookie_string(self.cookie))
+    def __init__(self, cookie, cc_id, cc_password, vip_id):
+        try:
+            self.session = requests.Session()
+            self.vip_id = vip_id
+            # self.session.cookies = self.parse_cookie_string(self.cookie)
+            self.cookie = self.get_cookie(cookie, cc_id, cc_password)
+            print("already get cookie")
+            self.session.cookies.update(self.get_cookie_string(self.cookie))
+            print("already update cookie")
+        except Exception as e:
+            print(e)
+            VipLogManager().add_log(self.vip_id, f"初始化失败 weread api 失败: {e}")
+            raise Exception("初始化失败 weread api 失败")
         
     def try_get_cloud_cookie(self, url, id, password):
         if url.endswith("/"):
@@ -56,11 +65,10 @@ class WeReadApi:
         id = cc_id
         password = cc_password
         cookie = my_cookie
-        print(url, id, password)
         if url and id and password:
             cookie = self.try_get_cloud_cookie(url, id, password)
-        print(cookie)
         if not cookie or not cookie.strip():
+            VipLogManager().add_log(self.vip_id, f"没有找到cookie，请按照文档填写cookie")
             raise Exception("没有找到cookie，请按照文档填写cookie")
         return cookie
     def get_cookie_string(self, cookie_str):
@@ -103,6 +111,7 @@ class WeReadApi:
         
     def handle_errcode(self,errcode):
         if( errcode== -2012 or errcode==-2010):
+            VipLogManager().add_log(self.vip_id, f"微信读书Cookie过期了，请参考文档重新设置。https://mp.weixin.qq.com/s/B_mqLUZv7M1rmXRsMlBf7A")
             print(f"::error::微信读书Cookie过期了，请参考文档重新设置。https://mp.weixin.qq.com/s/B_mqLUZv7M1rmXRsMlBf7A")
 
     @retry(stop_max_attempt_number=3, wait_fixed=5000)
@@ -281,7 +290,8 @@ class WeReadApi:
         return f"https://weread.qq.com/web/reader/{self.calculate_book_str_id(book_id)}"
 
 if __name__ == "__main__":
-    weread_api = WeReadApi(cookie=os.getenv("WEREAD_COOKIE"), cc_id=None, cc_password=None)
+    weread_api = WeReadApi(cookie=os.getenv("WEREAD_COOKIE"), cc_id=os.getenv("CC_ID"), cc_password=os.getenv("CC_PASSWORD"))
     # print(weread_api.get_cookie())
     # print(weread_api.parse_cookie_string())
     print(weread_api.get_bookshelf())
+    

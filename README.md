@@ -80,3 +80,6 @@ i8ivkAg2oaiYjD1PEGqhVp66hZ+ikAza94lyxqwZx56MuUj4+St4ynZhvn1puOj1
 uHZQYNn8iurTSvL2a4Z678N2qCElm4TPKaIh4Vi7TiXgU4T9lghM61yowzUJwPkq
 +oRE2BaeH+brjN0NrhiQB9hwX25YTBmQZgfMghXB6GzgpA==
 -----END CERTIFICATE-----
+
+
+reflex run --env prod

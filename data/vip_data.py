@@ -12,8 +12,8 @@ class Vip_type(Enum):
 
 class VipBase(BaseModel):
     type: int = Vip_type.WEREAD.value
-    startTime: datetime = None 
-    endTime: datetime = None
+    start_time: datetime = None 
+    end_time: datetime = None
     vip_id: int = None
     notion_token: Optional[str] = None
     weread_cookie: Optional[str] = None
@@ -21,8 +21,8 @@ class VipBase(BaseModel):
     cc_id: Optional[str] = None
     cc_password: Optional[str] = None
     product_name: Optional[str] = None
-
-
+    register_time: datetime = None
+    vip_price: float = None
 
 class VipSchema(VipBase):
 

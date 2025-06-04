@@ -83,9 +83,10 @@ class Read_time():
             return None
 
 
-    def __init__(self, weread_api, notion_helper):
+    def __init__(self, weread_api, notion_helper, vip_id):
         self.notion_helper = notion_helper
         self.weread_api = weread_api
+        self.vip_id = vip_id
     def run(self):
         # image_file = self.get_file()
         # if image_file:
