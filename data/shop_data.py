@@ -25,6 +25,7 @@ class ProductAdd(ProductBase):
 class ProductSchema(ProductBase):
     class Config:
         from_attributes = True
+        
 # 订单信息
 class OrderInfo(BaseModel):
     order_id: str

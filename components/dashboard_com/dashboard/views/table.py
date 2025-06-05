@@ -210,7 +210,16 @@ def _show_product_item(item: ProductSchema, index: int) -> rx.Component:
     return rx.table.row(
         rx.table.row_header_cell(item.name),
         rx.table.cell(f"${item.price}"),
-        rx.table.cell(item.discount),
+        rx.table.cell(
+            rx.text_area(
+                value=item.description,
+                read_only=True,
+                width="100%",
+                height="100%",
+
+            )
+        ),
+        rx.table.cell(f"{(1 - item.discount) *100}%"),
         rx.table.cell(item.type),
         rx.table.cell(
             rx.hstack(
@@ -234,8 +243,10 @@ def product_table() -> rx.Component:
             rx.table.row(
                 _header_cell("产品名称", "user"),
                 _header_cell("产品价格", "dollar-sign"),
+                _header_cell("描述", "dollar-sign"),
                 _header_cell("产品折扣", "calendar"),
                 _header_cell("产品类型", "notebook-pen"),
+                _header_cell("操作", "notebook-pen"),
             ),
         ),
         rx.table.body(
@@ -323,8 +334,7 @@ def add_product() -> rx.Component:
                     value=ProductManagerState.product.name,
                     on_change=ProductManagerState.set_product_property("name"),
                 ),
-                rx.input(
-                    rx.input.slot(rx.icon("user")),
+                rx.text_area(
                     placeholder="说明",
                     value=ProductManagerState.product.description ,
                     on_change=ProductManagerState.set_product_property("description"),

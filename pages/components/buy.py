@@ -30,7 +30,7 @@ def buy_product_com():
                                 "whiteSpace": "normal",
                             }),
                         rx.button("购买", on_click=ShopService.buy_product(product)),
-                        rx.button("测试", on_click=ShopService.get_user_id),
+                        # rx.button("测试", on_click=ShopService.get_user_id),
                         align="start", 
                         justify="center",
                     ),

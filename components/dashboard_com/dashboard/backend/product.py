@@ -31,10 +31,9 @@ class ProductManagerState(rx.State):
 
     @rx.event
     def add_product(self):
-        if self.uploaded_images is None:
+        if self.product.image is None:
             rx.toast.error("请上传图片")
             return
-        print(self.uploaded_images)
         product = Product(name=self.product.name, image=self.product.image, description=self.product.description, price=self.product.price, discount=self.product.discount, type=self.product.type)
         with rx.session() as session:
             session.add(product)
@@ -45,7 +44,9 @@ class ProductManagerState(rx.State):
     @rx.event
     def edit_product(self, product_id: int):
         self.is_edit = True
-        self.product = self.product_list.filter(lambda x: x.product_id == product_id).first()
+        product = next((product for product in self.product_list if product.product_id == product_id), None)
+        if product:
+            self.product = ProductAdd(**product.model_dump())
         self.is_add = True
 
     @rx.event

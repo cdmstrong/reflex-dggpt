@@ -19,6 +19,9 @@ class LoginState(reflex_local_auth.LocalAuthState):
     is_admin: bool = False
 
     @rx.var(cache=True, interval=DEFAULT_AUTH_REFRESH_DELTA)
+    def user_is_admin(self) -> bool:
+        return self.user.is_admin
+    @rx.var(cache=True, interval=DEFAULT_AUTH_REFRESH_DELTA)
     def user_info(self) -> UserLogin:
         """The currently authenticated user, or a dummy user if not authenticated.
 
@@ -35,7 +38,7 @@ class LoginState(reflex_local_auth.LocalAuthState):
             user = result.first()
             if user:
                 self.user = UserLogin.from_orm(user)
-                print(f"user_info: {self.user}")
+                # print(f"user_info: {self.user}")
                 return self.user
             else:
                 return UserLogin(username="", password="", user_id=None, email="", is_admin=False, start_time=None, end_time=None, register_time=None)
@@ -56,7 +59,6 @@ class LoginState(reflex_local_auth.LocalAuthState):
             # print(user.id)
             self._login(user.id, expiration_delta=timedelta(days=2))
             self.error_message = ""
-            print(f"self.is_admin: {self.is_admin}")
             if self.is_admin:
                 self.user.is_admin = True
                 return rx.redirect("/admin/")
@@ -141,7 +143,7 @@ def require_admin(page: rx.app.ComponentCallable) -> rx.app.ComponentCallable:
     def protected_page():
         return rx.fragment(
             rx.cond(
-                LoginState.user.is_admin,  # type: ignore
+                LoginState.user_is_admin,  # type: ignore
                 page(),
                 rx.center(
                     # When this text mounts, it will redirect to the login page

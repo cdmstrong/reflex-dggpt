@@ -24,6 +24,20 @@ class VipBase(BaseModel):
     register_time: datetime = None
     vip_price: float = None
 
+class VipManager(VipBase):
+    vip_id: int = None
+    product_name: str = None
+    register_time: datetime = None
+    vip_price: float = None
+    notion_token: str = None
+    weread_cookie: str = None
+    notion_page: str = None
+    cc_id: str = None
+    cc_password: str = None
+    type: int = 1
+    start_time: datetime = None
+    end_time: datetime = None
+
 class VipSchema(VipBase):
 
     class Config:
