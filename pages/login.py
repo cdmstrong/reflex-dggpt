@@ -17,14 +17,61 @@ def login_page():
             rx.box(
                 rx.vstack(
                     rx.heading("登录", size="4", margin_bottom="24px"),
-                    rx.cond(
-                        ~LoginState.in_login,
-                        rx.input(placeholder="用户名", on_change=LoginState.set_username, value=LoginState.user.username),
-                    ),
                     
-                    rx.input(placeholder="邮箱", on_change=LoginState.set_email, value=LoginState.user.email),
-                    rx.input(placeholder="密码", type_="password", on_change=LoginState.set_password, value=LoginState.user.password),
-
+                    rx.form.root(
+                        rx.cond(
+                            ~LoginState.in_login,
+                            rx.form.field(
+                                rx.form.label("用户名"),
+                                rx.form.control(
+                                    rx.input(placeholder="用户名", on_change=LoginState.set_username, value=LoginState.user.username),
+                                    as_child=True,
+                                ),
+                                rx.form.message(
+                                    "请输入用户名",
+                                    match="valueMissing",
+                                    force_match=LoginState.user.username == "",
+                                    color="var(--red-11)",
+                                ),
+                            ),
+                        ),
+                        rx.form.field(
+                            rx.form.label("邮箱"),
+                            rx.form.control(
+                                rx.input(
+                                    placeholder="邮箱",
+                                    on_change=LoginState.set_email,
+                                    name="email",
+                                    type="email",
+                                ),
+                                as_child=True,
+                            ),
+                            rx.form.message(
+                                "请输入正确的邮箱格式",
+                                match="valueMissing",
+                                force_match=LoginState.invalid_email,
+                                color="var(--red-11)",
+                            ),
+                        ),
+                        rx.form.field(
+                            rx.form.label("密码"),
+                            rx.form.control(
+                                rx.input(placeholder="密码", type="password", on_change=LoginState.set_password, value=LoginState.user.password),
+                                as_child=True,
+                            ),  
+                            rx.form.message(
+                                "请输入密码",
+                                match="valueMissing",
+                                force_match=LoginState.user.password == "",
+                                color="var(--red-11)",
+                            ),
+                        ),
+                    ),
+                    rx.checkbox(
+                        "管理员登录",
+                        on_change=LoginState.toggle_admin,
+                        is_checked=LoginState.is_admin,
+                    ),
                     rx.cond(
                         LoginState.in_login,
                         rx.hstack(

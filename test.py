@@ -1,21 +1,18 @@
 
 from datetime import datetime
+import re
 
 from matplotlib.dates import relativedelta
 
-def format_time(time: any):
-    if isinstance(time, str):
-        dt = datetime.fromisoformat(time)
-        return dt.strftime('%Y-%m-%d %H:%M:%S')
-    elif isinstance(time, datetime):
-        return time.strftime('%Y-%m-%d %H:%M:%S')
+def invalid_email(email: str) -> bool:
+    # 定义邮箱的正则表达式
+    pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+.[a-zA-Z0-9-.]+$'
+    # 使用 re.match 方法进行匹配
+    if re.match(pattern, email):
+        return True
     else:
-        return "start_time is None or unknown type"
-
+        return False
 
 if __name__ == "__main__":
-    print(format_time(datetime(2025, 5, 28, 16, 48, 58)))
-    print(format_time(datetime.now()))
-    print(format_time(None))
-    print(format_time(123))
-    print(format_time("2024-01-01 00:00:00"))
+    print(invalid_email("23213@qq.com"))
+    print(invalid_email("2321.com"))

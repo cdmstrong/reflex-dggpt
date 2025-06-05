@@ -12,7 +12,7 @@ def buy_product_com():
             rx.flex(
                 rx.foreach(ShopService.product_list, lambda product: rx.card(
                     rx.vstack(
-                        rx.image(src=f"/{product.image}", width="160px", height="160px"),
+                        rx.image(src=rx.get_upload_url(product.image), width="160px", height="160px"),
                         rx.text(product.name, bold=True, size="3"),
                         rx.hstack( 
                             rx.text(f"￥{product.price * (product.discount)}元", size="3", color="red"),

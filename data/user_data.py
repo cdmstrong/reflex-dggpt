@@ -13,7 +13,8 @@ class UserBase(BaseModel):
     register_time: Optional[datetime] = None #注册时间
     recharge_count: Optional[int] = 0
 
-
+class UserSchema(UserBase):
+    pass
 def uuid_to_int(in_id: str) -> int:
     return int(in_id.replace("-", ""), 16)
 

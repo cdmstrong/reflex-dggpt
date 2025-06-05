@@ -9,7 +9,7 @@ import reflex as rx
 from .. import styles
 from ..components.navbar import navbar
 from ..components.sidebar import sidebar
-
+from services.login_service import require_admin
 # Meta tags for the app.
 default_meta = [
     {
@@ -118,7 +118,7 @@ def template(
                 margin="auto",
                 position="relative",
             )
-
+        
         @rx.page(
             route="/admin" + route,
             title=title,
@@ -127,6 +127,7 @@ def template(
             script_tags=script_tags,
             on_load=on_load,
         )
+        @require_admin
         def theme_wrap():
             return rx.theme(
                 templated_page(),

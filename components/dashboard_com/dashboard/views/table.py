@@ -212,6 +212,18 @@ def _show_product_item(item: ProductSchema, index: int) -> rx.Component:
         rx.table.cell(f"${item.price}"),
         rx.table.cell(item.discount),
         rx.table.cell(item.type),
+        rx.table.cell(
+            rx.hstack(
+                rx.button(
+                    rx.icon("edit", size=18),
+                    on_click=ProductManagerState.edit_product(item.product_id),
+                ),
+                rx.button(
+                    rx.icon("trash", size=18),
+                    on_click=ProductManagerState.delete_product(item.product_id),
+                )
+            )
+        ),
         style={"_hover": {"bg": hover_color}, "bg": bg_color},
         align="center",
     )
@@ -236,3 +248,111 @@ def product_table() -> rx.Component:
         size="3",
         width="100%",           
     )
+def product_modal():
+    return rx.dialog.root(
+            rx.dialog.content(
+                rx.dialog.title("添加产品"),
+                rx.dialog.description("请填写产品信息"),
+                add_product(),
+                rx.flex(
+                    rx.cond(
+                        ProductManagerState.is_edit,
+                        rx.button("编辑", on_click=ProductManagerState.update_product),
+                        rx.button("添加", on_click=ProductManagerState.add_product),
+                    ),
+                    rx.dialog.close(
+                        rx.button("关闭")
+                    ),
+                    spacing="3",
+                    justify="end",
+                ),
+                max_width="450px",
+            ),
+            open=ProductManagerState.is_add,
+            on_open_change=ProductManagerState.toggle_add,
+    )
+
+def add_product() -> rx.Component:
+    
+    return rx.flex(
+                # 点击加号上传图片，点击图片再次上传图片，上传好显示图片内容
+                rx.cond(
+                    ProductManagerState.product.image,
+                    rx.image(src=rx.get_upload_url(ProductManagerState.product.image),width="100px",height="100px", on_click=ProductManagerState.clear_uploaded_images),
+                    rx.upload(
+                        rx.box(
+                            rx.icon(
+                                tag="cloud_upload",
+                                style={
+                                    "width": "3rem",
+                                    "height": "3rem",
+                                    "color": "#2563eb",
+                                    "marginBottom": "0.75rem",
+                                },
+                            ),
+                            rx.text(
+                                "点击上传",
+                                style={
+                                    "fontWeight": "bold",
+                                    "color": "#1d4ed8",
+                                },
+                            ),
+                            style={
+                                "display": "flex",
+                                "flexDirection": "column",
+                                "alignItems": "center",
+                                "justifyContent": "center",
+                                "padding": "1.5rem",
+                                "textAlign": "center",
+                            },
+                        ),
+                        id="product_image_upload",
+                        accept={"image/png": [".png"], "image/jpeg": [".jpg", ".jpeg"]},
+                        max_files=1,
+                        border="1px dotted #6b7280",
+                        padding="2em",
+                        on_drop=ProductManagerState.handle_upload(
+                            rx.upload_files(upload_id="product_image_upload")
+                        ),
+
+                    ),
+                ),
+                rx.input(
+                    rx.input.slot(rx.icon("user")),
+                    placeholder="产品名称",
+                    value=ProductManagerState.product.name,
+                    on_change=ProductManagerState.set_product_property("name"),
+                ),
+                rx.input(
+                    rx.input.slot(rx.icon("user")),
+                    placeholder="说明",
+                    value=ProductManagerState.product.description ,
+                    on_change=ProductManagerState.set_product_property("description"),
+                ),
+                rx.input(
+                    rx.input.slot(rx.icon("user")),
+                    placeholder="产品价格",
+                    type="number",
+                    value=ProductManagerState.product.price ,
+                    on_change=ProductManagerState.set_product_property("price"),
+                ),
+                rx.input(
+                    rx.input.slot(rx.icon("user")),
+                    placeholder="产品折扣",
+                    type="number",
+                    value=ProductManagerState.product.discount,
+                    on_change=ProductManagerState.set_product_property("discount"),
+                ),
+                rx.input(
+                    rx.input.slot(rx.icon("user")),
+                    placeholder="产品类型，微信读书为1，kindle为2",
+                    type="number",
+                    value=ProductManagerState.product.type,
+                    on_change=ProductManagerState.set_product_property("type"),
+                ),
+                spacing="3",
+                direction="column",
+                align="center",
+                width="100%",
+                padding="1rem",
+            )

@@ -4,17 +4,23 @@ from typing import Optional
 from data.vip_data import Vip_type
 
 class ProductBase(BaseModel):
-    product_id: int
-    name: str
-    image: str
-    price: float
-    description: str
+    product_id: Optional[int] = None
+    name: Optional[str] = None
+    image: Optional[str] = None
+    price: Optional[float] = None
+    description: Optional[str] = None
     time: Optional[int] = None
     discount: Optional[float] = None
-    type: Optional[Vip_type] = Vip_type.WEREAD.value
+    type: Optional[int] = 1
 
 class ProductSell(ProductBase):
     pass
+class ProductAdd(ProductBase):
+    name: str = ""
+    price: float = 0
+    description: str = ""
+    discount: float = 0
+    type: int = 1
 
 class ProductSchema(ProductBase):
     class Config:
